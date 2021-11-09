@@ -17,21 +17,30 @@ def handle_service(req):
     }
 
     r = requests.post(get_answer_url, json=message)
-    print(r.json())
     response = DialogueResponse()
     response.answer = ""
-    for line in r.json():
-        text = line['text']
-        if text.startswith("__add__"):
-            texts = text.split(",")
-            response.answer = "Adding: " + API.add_item(texts[2], texts[1])
-        elif text.startswith("__remove__"):
-            texts = text.split(",")
-            response.answer = "Removing: " + API.remove_item(texts[2], texts[1])
-        elif text.startswith("__show__"):
-            response.answer = "Your shopping list: " + API.show_list()
-        else:
-            response.answer += text + ' ' if 'text' in line else ''
+    try:
+        for line in r.json():
+            text = line['text']
+            if text.startswith("__add__"):
+                _, quantity, item = text.split(",")
+                new_quantity = API.add_item(item, quantity)['quantity']
+                response.answer = f"Adding {quantity} {item}, you have now {new_quantity} {item} in your shopping list." 
+            elif text.startswith("__remove__"):
+                _, quantity, item = text.split(",")
+                try:
+                    new_quantity = API.remove_item(item, quantity)
+                    new_quantity = new_quantity.get('quantity') if new_quantity is not None else 0
+                    response.answer = f"Removing {quantity} {item}, you have now {new_quantity} {item} in your shopping list." 
+                except ValueError:
+                    response.answer = f"There's no item {item} in your shopping list."
+            elif text.startswith("__show__"):
+                response.answer = "\n" + str(API.show_list())
+            else:
+                response.answer += text + ' ' if 'text' in line else ''
+    except Exception as e:
+        print(e)
+        response.answer = "Operation failed."
 
     return response
 

@@ -15,7 +15,12 @@ class API():
 
     @staticmethod
     def remove_item(item, quantity):
-        return item_table.remove_quantity("default", stem.stem(item), int(quantity))  
+        if item_table.get("default", stem.stem(item)) is None:
+            raise ValueError()
+
+        if quantity == "all":
+            return item_table.delete("default", stem.stem(item))
+        return item_table.remove_quantity("default", stem.stem(item), int(quantity)) 
 
     @staticmethod
     def show_list():

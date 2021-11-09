@@ -11,7 +11,7 @@ class Database:
 
     def __init__(self, db_name: Text = 'chat_bot.db'):
         self._db_name = db_name
-        self._conn = sqlite3.connect(db_name, 1000)
+        self._conn = sqlite3.connect(db_name, 1000, check_same_thread=False)
         self._cur = None
         self._nest_index = 0
         with self as cur:
@@ -171,8 +171,20 @@ class ItemTable(TableBase):
 
     def all(self) -> List[Dict[Text, Any]]:
         data = self.db.all(self.TABLE_NAME)
-        return list(map(self._convert_query, data))
+        return ShoppingList(list(map(self._convert_query, data)))
 
     @staticmethod
     def _convert_query(data: Tuple[Text, Text, Text, int]):
         return dict(id=data[0], list_name=data[1], name=data[2], quantity=data[3])
+
+class ShoppingList:
+    def __init__(self, data):
+        self.data = data
+    
+    def __str__(self):
+        if len(self.data) == 0:
+            return "Your shopping list is empty."
+        else:
+            title = '# -------- SHOPPING LIST  -------- #\n'
+            rows = (f'{item["name"]:>18s} - {item["quantity"]}' for item in self.data)
+            return title + '\n'.join(rows)
