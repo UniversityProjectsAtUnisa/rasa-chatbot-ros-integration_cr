@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import abc
 from typing import Dict, Any, Text, NoReturn, Tuple, Optional, List

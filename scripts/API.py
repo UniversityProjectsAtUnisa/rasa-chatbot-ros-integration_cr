@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from database import Database, ShoppingListTable, ItemTable
 from nltk import PorterStemmer
